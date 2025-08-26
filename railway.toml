@@ -1,14 +1,7 @@
-[build]
-builder = "nixpacks"
-buildCommand = "cd api && yarn install && yarn build"
-watchPatterns = ["api/**"]
-
 [deploy]
-startCommand = "cd api && yarn start"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
 
 [env]
 NODE_ENV = "production"
-NODE_VERSION = "20.19.0"
