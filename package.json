@@ -1,0 +1,42 @@
+{
+  "name": "adam-painter-booking-system",
+  "version": "2.0.0",
+  "description": "Full-stack painter booking system with smart prioritization, TypeScript, and MongoDB",
+  "private": true,
+  "author": "Adam Painter Booking System",
+  "license": "MIT",
+  "keywords": [
+    "booking",
+    "painter",
+    "scheduling",
+    "typescript",
+    "react",
+    "mongodb",
+    "fullstack"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "yarn": ">=1.22.0"
+  },
+  "workspaces": [
+    "api",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"API,WEB\" -c \"blue,green\" \"cd api && yarn dev\" \"cd frontend && yarn dev\"",
+    "build": "concurrently \"cd api && yarn build\" \"cd frontend && yarn build\"",
+    "start": "concurrently \"cd api && yarn start\" \"cd frontend && yarn start\"",
+    "start:api": "cd api && yarn start",
+    "start:frontend": "cd frontend && yarn start",
+    "dev:api": "cd api && yarn dev",
+    "dev:frontend": "cd frontend && yarn dev",
+    "install:all": "yarn install && cd api && yarn install && cd ../frontend && yarn install",
+    "clean": "concurrently \"cd api && yarn clean\" \"cd frontend && yarn clean\"",
+    "type-check": "concurrently \"cd api && yarn type-check\" \"cd frontend && yarn type-check\"",
+    "lint": "concurrently \"cd api && yarn lint\" \"cd frontend && yarn lint\"",
+    "test": "concurrently \"cd api && yarn test\" \"cd frontend && yarn test\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
