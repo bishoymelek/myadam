@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document } from "mongoose";
 
 export interface IAvailability extends Document {
   painterId: string;
@@ -13,7 +13,7 @@ export interface IBooking extends Document {
   painterName: string;
   startTime: Date;
   endTime: Date;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: "confirmed" | "pending" | "cancelled";
   customerId: string;
   createdAt?: Date;
   updatedAt?: Date;

@@ -1,5 +1,6 @@
 import { Availability, Booking } from "../models";
 import { IAvailability, SuggestionInternal } from "../types";
+import { derivePainterName } from "./painterName";
 
 export class AvailabilityService {
   static async createAvailability(
@@ -48,16 +49,6 @@ export class AvailabilityService {
             endTime: { $gte: startTime },
           },
         ],
-      });
-
-      console.log(`🔍 Checking ${availability.painterId}:`, {
-        availableWindow: `${availability.startTime.toISOString()} - ${availability.endTime.toISOString()}`,
-        requestedWindow: `${startTime.toISOString()} - ${endTime.toISOString()}`,
-        hasConflict: !!conflictingBooking,
-        conflictingBooking: conflictingBooking ? {
-          start: conflictingBooking.startTime.toISOString(),
-          end: conflictingBooking.endTime.toISOString()
-        } : null
       });
 
       // Only include painters with NO conflicting bookings
@@ -117,8 +108,6 @@ export class AvailabilityService {
     // Sort by score (highest first) and return the best painter
     painterScores.sort((a, b) => b.score - a.score);
 
-    console.log(`\n🎯 SMART PAINTER PRIORITIZATION 🎯`);
-    console.log(`📊 Evaluating ${painterScores.length} available painters:`);
     painterScores.forEach((p, i) => {
       console.log(
         `   ${
@@ -128,12 +117,6 @@ export class AvailabilityService {
         )} points`
       );
     });
-    console.log(
-      `\n✅ WINNER: ${painterScores[0].availability.painterId.toUpperCase()} (${painterScores[0].score.toFixed(
-        1
-      )} points)`
-    );
-    console.log(`=====================================\n`);
 
     return painterScores[0].availability;
   }
@@ -144,62 +127,61 @@ export class AvailabilityService {
     limit: number = 3
   ): Promise<SuggestionInternal[]> {
     const duration = endTime.getTime() - startTime.getTime();
+    const requestDate = new Date(startTime);
 
-    // Get all availabilities
-    const availabilities = await Availability.find({}).sort({ startTime: 1 });
+    // Get all future availabilities
+    const availabilities = await Availability.find({
+      endTime: { $gt: new Date() },
+    }).sort({ startTime: 1 });
+
     const suggestions: SuggestionInternal[] = [];
 
+    // Check all availabilities - prioritize same day
     for (const availability of availabilities) {
       const availStart = new Date(availability.startTime);
       const availEnd = new Date(availability.endTime);
+      const isSameDay =
+        availStart.toDateString() === requestDate.toDateString();
 
-      // Skip past availabilities
-      if (availEnd <= new Date()) continue;
-
-      // Check multiple potential time slots within this availability window
+      // Start from availability start or current time
       let currentSlot = new Date(
         Math.max(availStart.getTime(), new Date().getTime())
       );
 
+      // Check all possible slots in this availability
       while (currentSlot.getTime() + duration <= availEnd.getTime()) {
         const slotEnd = new Date(currentSlot.getTime() + duration);
 
-        // Check if this slot conflicts with existing bookings
+        // Check for conflicts
         const conflictingBooking = await Booking.findOne({
           painterId: availability.painterId,
           $or: [
-            {
-              startTime: { $lt: slotEnd },
-              endTime: { $gte: currentSlot },
-            },
+            { startTime: { $lt: slotEnd }, endTime: { $gte: currentSlot } },
           ],
         });
 
         if (!conflictingBooking) {
-          // Calculate time difference from requested time
           const timeDiff = Math.abs(
             currentSlot.getTime() - startTime.getTime()
           );
+          // Same day gets massive priority
+          const adjustedTimeDiff = isSameDay ? timeDiff * 0.01 : timeDiff;
 
           suggestions.push({
             painterId: availability.painterId,
-            painterName: "Best Painter",
+            painterName: derivePainterName(availability.painterId),
             startTime: currentSlot.toISOString(),
             endTime: slotEnd.toISOString(),
-            timeDifference: timeDiff,
+            timeDifference: adjustedTimeDiff,
           });
-
-          if (suggestions.length >= limit * 2) break;
         }
 
-        // Move to next hour slot
+        // Move to next hour
         currentSlot = new Date(currentSlot.getTime() + 60 * 60 * 1000);
       }
-
-      if (suggestions.length >= limit * 2) break;
     }
 
-    // Sort by time difference and return closest suggestions
+    // Sort and return top suggestions
     return suggestions
       .sort((a, b) => a.timeDifference - b.timeDifference)
       .slice(0, limit);

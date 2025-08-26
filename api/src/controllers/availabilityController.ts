@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { AvailabilityService } from '../services';
-import { CreateAvailabilityRequest, AvailabilityResponse } from '../types';
+import { Request, Response } from "express";
+import { AvailabilityService } from "../services";
+import { CreateAvailabilityRequest, AvailabilityResponse } from "../types";
 
 export class AvailabilityController {
   static async createAvailability(
@@ -33,7 +33,6 @@ export class AvailabilityController {
 
       res.json(response);
     } catch (error) {
-      console.error("Error creating availability:", error);
       res.status(500).json({ error: "Failed to create availability" });
     }
   }

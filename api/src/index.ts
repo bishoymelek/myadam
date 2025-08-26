@@ -73,7 +73,7 @@ const startServer = async (): Promise<void> => {
     // Start the server
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`📍 Health check: /health`);
       console.log(`🎨 Adam Painter Booking API v2.0.0 ready!`);
     });
   } catch (error) {
