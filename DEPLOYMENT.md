@@ -27,23 +27,23 @@
    ```
 5. Deploy automatically triggers
 
-## 3. Frontend Deployment (Vercel)
+## 3. Frontend Deployment (GitHub Pages)
 
-### Option A: Deploy API + Frontend on Vercel (Recommended)
-1. Go to [Vercel](https://vercel.com) → "Add New" → "Project"
-2. Import **the entire my-adam repository**
-3. Vercel will auto-detect the `vercel.json` for the API
-4. Set environment variables:
-   ```
-   MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/adam-painter-booking
-   VITE_API_BASE=https://your-project-name.vercel.app
-   ```
-5. Deploy automatically
+**Automatic deployment with GitHub Actions:**
 
-### Option B: Separate Frontend Deployment
-1. Create a new GitHub repo with just the `frontend/` folder contents
-2. Deploy that repo to Vercel
-3. Set environment variable: `VITE_API_BASE=https://your-railway-api.up.railway.app`
+1. **Push your code** to GitHub (main/master branch)
+2. **Enable GitHub Pages**:
+   - Go to your GitHub repo → Settings → Pages
+   - Source: "GitHub Actions"
+3. **GitHub Actions will automatically**:
+   - Build the frontend with your Railway API URL
+   - Deploy to GitHub Pages
+4. **Your app will be live at**: `https://yourusername.github.io/my-adam/`
+
+**Manual Setup (if needed):**
+- The deployment is configured in `.github/workflows/deploy.yml`  
+- API URL is hardcoded as: `https://myadam-production-0869.up.railway.app`
+- Builds from `frontend/` folder automatically
 
 ## 4. Environment Variables Summary
 
